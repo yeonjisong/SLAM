@@ -76,5 +76,5 @@ if __name__ == '__main__':
     # Write all filtered positions to file.
     f = open("poses_from_ticks.txt", "w")
     for pose in filtered:
-        print (f , "F %f %f %f" % pose)
+        f.write("F %f %f %f \n" % pose)
     f.close()

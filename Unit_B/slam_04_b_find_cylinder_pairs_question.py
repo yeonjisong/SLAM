@@ -7,11 +7,17 @@ from lego_robot import *
 from slam_b_library import filter_step
 from slam_04_a_project_landmarks import\
      compute_scanner_cylinders, write_cylinders
-
+import numpy as np
 # Given a list of cylinders (points) and reference_cylinders:
 # For every cylinder, find the closest reference_cylinder and add
 # the index pair (i, j), where i is the index of the cylinder, and
 # j is the index of the reference_cylinder, to the result list.
+
+def compute_dist(a, b):
+    x = a[0] - b[0]
+    y = a[1] - b[1]
+    return np.sqrt(x*x + y*y)
+
 def find_cylinder_pairs(cylinders, reference_cylinders, max_radius):
     cylinder_pairs = []
 
@@ -20,6 +26,10 @@ def find_cylinder_pairs(cylinders, reference_cylinders, max_radius):
     # In the loop, if cylinders[i] is closest to reference_cylinders[j],
     # and their distance is below max_radius, then add the
     # tuple (i,j) to cylinder_pairs, i.e., cylinder_pairs.append( (i,j) ).
+    for i, c in enumerate(cylinders):
+        for j, r in enumerate(reference_cylinders):
+            if compute_dist(c, r) < max_radius:
+                cylinder_pairs.append((i, j))
 
     return cylinder_pairs
 
@@ -51,8 +61,8 @@ if __name__ == '__main__':
     reference_cylinders = [l[1:3] for l in logfile.landmarks]
 
     # Iterate over all positions.
-    out_file = file("find_cylinder_pairs.txt", "w")
-    for i in xrange(len(logfile.scan_data)):
+    out_file = open("find_cylinder_pairs.txt", "w")
+    for i in range(len(logfile.scan_data)):
         # Compute the new pose.
         pose = filter_step(pose, logfile.motor_ticks[i],
                            ticks_to_mm, robot_width,
@@ -71,11 +81,11 @@ if __name__ == '__main__':
 
         # Write to file.
         # The pose.
-        print >> out_file, "F %f %f %f" % pose
+        out_file.write("F %f %f %f\n" % pose)
         # The detected cylinders in the scanner's coordinate system.
-        write_cylinders(out_file, "D C", cartesian_cylinders)
+        write_cylinders(out_file, "D C ", cartesian_cylinders)
         # The reference cylinders which were part of a cylinder pair.
-        write_cylinders(out_file, "W C",
+        write_cylinders(out_file, "W C ",
             [reference_cylinders[j[1]] for j in cylinder_pairs])
 
     out_file.close()

@@ -109,13 +109,6 @@ if __name__ == '__main__':
                                    minimum_valid_distance)
         cartesian_cylinders = compute_cartesian_coordinates(cylinders,
                                                             cylinder_offset)
-##        # Write to file.
-##        print (out_file, "D C")
-##        for c in cartesian_cylinders:
-##            print (out_file, "%.1f %.1f" % c)
-##        print (out_file)
-##    out_file.close()
-
         # Write to file.
         out_file.write("D C ")
         for c in cartesian_cylinders:
@@ -123,3 +116,4 @@ if __name__ == '__main__':
         out_file.write("\n")
         print(out_file)
     out_file.close()
+

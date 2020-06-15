@@ -2,7 +2,8 @@
 # 02_a_filter_motor
 # Claus Brenner, 31 OCT 2012
 from math import sin, cos, pi
-from pylab import *
+from matplotlib import *
+import matplotlib.pyplot as plt
 from lego_robot import *
 
 # This function takes the old (x, y, heading) pose and the motor ticks
@@ -17,6 +18,8 @@ def filter_step(old_pose, motor_ticks, ticks_to_mm, robot_width):
         theta = old_pose[2]
         x = old_pose[0] + motor_ticks[0] * ticks_to_mm * cos(theta)
         y = old_pose[1] + motor_ticks[0] * ticks_to_mm * sin(theta)
+
+
         return (x, y, theta)
 
     else:
@@ -26,12 +29,12 @@ def filter_step(old_pose, motor_ticks, ticks_to_mm, robot_width):
         x = old_pose[0]
         y = old_pose[1]
         theta = old_pose[2]
-        alpha = ticks_to_mm * (motor_ticks[1] - motor_ticks[0]) / robot_width
-        R = motor_ticks[0] * ticks_to_mm / alpha
-        C = [x - (R+robot_width/2) * sin(theta), y + (R+robot_width/2) * cos(theta)]
+        alpha = ticks_to_mm*(motor_ticks[1] - motor_ticks[0])/robot_width
+        R = motor_ticks[0]*ticks_to_mm/alpha
+        C = [x - (R+robot_width/2)*sin(theta), y + (R+robot_width/2)*cos(theta)]
         theta += alpha
-        x = C[0] + (R+robot_width/2) * sin(theta)
-        y = C[1] - (R+robot_width/2) * cos(theta)
+        x = C[0] + (R+robot_width/2)*sin(theta)
+        y = C[1] - (R+robot_width/2)*cos(theta)
         return (x, y, theta)
 
 if __name__ == '__main__':
@@ -56,6 +59,6 @@ if __name__ == '__main__':
 
     # Draw result.
     for pose in filtered:
-        print (pose)
-        plot([p[0] for p in filtered], [p[1] for p in filtered], 'bo')
+        print(pose)
+        plt.plot([p[0] for p in filtered], [p[1] for p in filtered], 'bo')
     plt.show()

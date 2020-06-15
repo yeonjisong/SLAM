@@ -1,7 +1,8 @@
 # Python routines to inspect a ikg LEGO robot logfile.
-# Author: Claus Brenner, 28.10.2012
+# Author: Claus Brenner, 28 OCT 2012
+from __future__ import print_function
 from tkinter import *
-import tkinter.filedialog as tkFileDialog
+from tkinter import filedialog as tkFileDialog
 from lego_robot import *
 from math import sin, cos, pi
 
@@ -19,10 +20,10 @@ max_scanner_range = 2200.0
 
 class DrawableObject(object):
     def draw(self, at_step):
-        print ("To be overwritten - will draw a certain point in time:", at_step)
+        print("To be overwritten - will draw a certain point in time:"), at_step
 
     def background_draw(self):
-        print ("Background draw.")
+        print("Background draw.")
 
 class Trajectory(DrawableObject):
     def __init__(self, points, canvas,
@@ -74,7 +75,7 @@ class ScannerData(DrawableObject):
         # Store the result in self.scan_polygons.
         self.scan_polygons = []
         for s in list_of_scans:
-            poly = [ to_sensor_canvas((0,0), canvas_extents, scanner_range) ]
+            poly = [to_sensor_canvas((0,0), canvas_extents, scanner_range)]
             i = 0
             for m in s:
                 angle = LegoLogfile.beam_index_to_angle(i)
@@ -134,7 +135,7 @@ class Landmarks(DrawableObject):
     def draw(self, at_step):
         # Landmarks are background only.
         pass
-    
+
 class Points(DrawableObject):
     def __init__(self, points, canvas, color = "red", radius = 5):
         self.points = points
@@ -148,7 +149,9 @@ class Points(DrawableObject):
 
     def draw(self, at_step):
         if self.cursor_objects:
-            map(self.canvas.delete, self.cursor_objects)
+            for obj in self.cursor_objects:
+                self.canvas.delete(obj)
+
             self.cursor_objects = []
         if at_step < len(self.points):
             for c in self.points[at_step]:
@@ -185,7 +188,11 @@ def slider_moved(index):
 
 def add_file():
     filename = tkFileDialog.askopenfilename(filetypes = [("all files", ".*"), ("txt files", ".txt")])
-    if filename and filename not in all_file_names:
+    if filename:
+        # If the file is in the list already, remove it (so it will be appended
+        # at the end).
+        if filename in all_file_names:
+            all_file_names.remove(filename)
         all_file_names.append(filename)
         load_data()
 
@@ -226,11 +233,11 @@ def load_data():
                      for cylinders_one_scan in logfile.detected_cylinders ]
         draw_objects.append(Points(positions, sensor_canvas, "#88FF88"))
 
-    # Insert: detected cylinders, in world coord system.
+    # Insert: detected cylinders, transformed into world coord system.
     if logfile.detected_cylinders and logfile.filtered_positions and \
         len(logfile.filtered_positions[0]) > 2:
         positions = []
-        for i in xrange(min(len(logfile.detected_cylinders), len(logfile.filtered_positions))):
+        for i in range(min(len(logfile.detected_cylinders), len(logfile.filtered_positions))):
             this_pose_positions = []
             pos = logfile.filtered_positions[i]
             dx = cos(pos[2])
@@ -242,6 +249,13 @@ def load_data():
                 this_pose_positions.append(p)
             positions.append(this_pose_positions)
         draw_objects.append(Points(positions, world_canvas, "#88FF88"))
+
+    # Insert: world objects, cylinders.
+    if logfile.world_cylinders:
+        positions = [[to_world_canvas(pos, canvas_extents, world_extents)
+                      for pos in cylinders_one_scan]
+                      for cylinders_one_scan in logfile.world_cylinders]
+        draw_objects.append(Points(positions, world_canvas, "#DC23C5"))
 
     # Start new canvas and do all background drawing.
     world_canvas.delete(ALL)
