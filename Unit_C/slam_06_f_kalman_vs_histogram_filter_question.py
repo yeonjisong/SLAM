@@ -3,7 +3,7 @@
 # Claus Brenner, 29 NOV 2012
 from distribution import *
 from math import sqrt
-from matplotlib.mlab import normpdf
+from scipy.stats import norm
 from pylab import plot, show, ylim
 
 # Import the helper functions from a previous file.
@@ -29,11 +29,11 @@ def histogram_plot(prediction, measurement, correction):
 
 def kalman_plot(prediction, measurement, correction):
     """Helper to draw all curves in each filter step."""
-    plot([normpdf(x, prediction.mu, sqrt(prediction.sigma2))
+    plot([norm.pdf(x, prediction.mu, sqrt(prediction.sigma2))
           for x in range(*arena)], color = 'b', linewidth=2)
-    plot([normpdf(x, measurement.mu, sqrt(measurement.sigma2))
+    plot([norm.pdf(x, measurement.mu, sqrt(measurement.sigma2))
           for x in range(*arena)], color = 'g', linewidth=2)
-    plot([normpdf(x, correction.mu, sqrt(correction.sigma2))
+    plot([norm.pdf(x, correction.mu, sqrt(correction.sigma2))
           for x in range(*arena)], color = 'r', linewidth=2)
 
 #
@@ -54,12 +54,29 @@ def kalman_filter_step(belief, control, measurement):
     """Bayes filter step implementation: Kalman filter."""
 
     # --->>> Put your code here.
+    a = 1
+    c = 1
+
+    mu_t1 = belief.mu
+    sigma2_t1 = belief.sigma2
+
+    u_t = control.mu
+    sigma2_R = control.sigma2
+    sigma2_Q = measurement.sigma2
+
+    Z = measurement.mu
     
     # Prediction.
-    prediction = Density(belief.mu + 10.0, belief.sigma2 + 100.0)  # Replace
+    mu_tbar = a * mu_t1 + u_t
+    sigma2_tbar = a**2 * sigma2_t1 + sigma2_R
+    prediction = Density(mu_tbar, sigma2_tbar)  # Replace
+
+    K = c * sigma2_tbar / (c**2 * sigma2_tbar + sigma2_Q)
+    mu = mu_tbar + K * (Z - c * mu_tbar)
+    sigma2 = (1 - K * c) * sigma2_tbar
 
     # Correction.
-    correction = prediction  # Replace
+    correction = Density(mu, sigma2)  # Replace
 
     return (prediction, correction)
 
@@ -81,7 +98,7 @@ if __name__ == '__main__':
     measurements_ = [ Density(60, 10**2), Density(140, 20**2) ]  # Kalman
 
     # This is the filter loop.
-    for i in xrange(len(controls)):
+    for i in range(len(controls)):
         # Histogram
         (prediction, position) = histogram_filter_step(position, controls[i], measurements[i])
         histogram_plot(prediction, measurements[i], position)

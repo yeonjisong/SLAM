@@ -7,9 +7,8 @@ from distribution import *
 def move(distribution, delta):
     """Returns a Distribution that has been moved (x-axis) by the amount of
        delta."""
-
     # --->>> Insert your code here.
-    
+    distribution = Distribution(distribution.offset+delta, distribution.values)
     return distribution  # Replace this by your own result.
 
 if __name__ == '__main__':

@@ -49,8 +49,8 @@ class Distribution:
         if stop == None:
             stop = self.stop()
         if start <= stop:
-            indices = [i + 0.5 for i in xrange(start, stop)]
-            vals = [self.value(i) for i in xrange(start, stop)]
+            indices = [i + 0.5 for i in range(start, stop)]
+            vals = [self.value(i) for i in range(start, stop)]
             return (indices, vals)
         else:
             return ([], [])
@@ -67,9 +67,9 @@ class Distribution:
         w = int(half_width)
         c = int(center)
         values = []
-        for i in xrange(-w+1, 0):
+        for i in range(-w+1, 0):
             values.append(w+i)
-        for i in xrange(0, w):
+        for i in range(0, w):
             values.append(w-i)
         d = Distribution(center-w+1, values)
         d.normalize()
@@ -84,7 +84,7 @@ class Distribution:
         sigma2 = sigma * sigma
         extent = int(ceil(cut * sigma))
         values = []
-        for x in xrange(mu - extent, mu + extent + 1):
+        for x in range(mu - extent, mu + extent + 1):
             values.append(exp((-0.5*(x-mu)*(x-mu))/sigma2))
         d = Distribution(mu - extent, values)
         d.normalize()
@@ -101,11 +101,11 @@ class Distribution:
         # First make an all-zero list which covers all indices.
         start = min([d.start() for d in distributions])
         stop  = max([d.stop() for d in distributions])
-        sum_dist = [0.0 for _ in xrange(start, stop)]
-        for i in xrange(len(distributions)):
+        sum_dist = [0.0 for _ in range(start, stop)]
+        for i in range(len(distributions)):
             dist = distributions[i]
             # Now weight all values and add them to sum_dist.
-            for j in xrange(len(dist.values)):
+            for j in range(len(dist.values)):
                 sum_dist[dist.start()-start+j] += dist.values[j] * weights[i]
         d = Distribution(start, sum_dist)
         Distribution.normalize(d)
